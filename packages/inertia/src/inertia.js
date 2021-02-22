@@ -289,15 +289,15 @@ export default {
           }
         }
       }), {
-        get: function(target, prop) {
-          if (['then', 'catch', 'finally'].includes(prop)) {
-            console.warn('Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\nLearn more at https://inertiajs.com/manual-visits#promise-deprecation')
-          }
-          return typeof target[prop] === 'function'
-            ? target[prop].bind(target)
-            : target[prop]
-        },
+      get: function (target, prop) {
+        if (['then', 'catch', 'finally'].includes(prop)) {
+          console.warn('Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\nLearn more at https://inertiajs.com/manual-visits#promise-deprecation')
+        }
+        return typeof target[prop] === 'function'
+          ? target[prop].bind(target)
+          : target[prop]
       },
+    },
     )
   },
 
@@ -326,12 +326,20 @@ export default {
 
   pushState(page) {
     this.page = page
-    window.history.pushState(page, '', page.url)
+    try {
+      window.history.pushState(page, '', page.url)
+    } catch (err) {
+      window.history.pushState(page, '')
+    }
   },
 
   replaceState(page) {
     this.page = page
-    window.history.replaceState(page, '', page.url)
+    try {
+      window.history.replaceState(page, '', page.url)
+    } catch (err) {
+      window.history.replaceState(page, '')
+    }
   },
 
   handlePopstateEvent(event) {
