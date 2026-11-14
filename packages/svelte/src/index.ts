@@ -1,0 +1,31 @@
+import { config as coreConfig } from '@inertiajs/core'
+import type { SvelteInertiaAppConfig } from './types'
+
+export { http, progress, router, socketId } from '@inertiajs/core'
+export { default as App } from './components/App.svelte'
+export { createForm } from './components/createForm'
+export { default as Deferred } from './components/Deferred.svelte'
+export { default as Form } from './components/Form.svelte'
+export { useFormContext } from './components/formContext'
+export { default as InfiniteScroll } from './components/InfiniteScroll.svelte'
+export { default as Link } from './components/Link.svelte'
+export { default as WhenMounted } from './components/WhenMounted.svelte'
+export { default as WhenVisible } from './components/WhenVisible.svelte'
+export { default as createInertiaApp } from './createInertiaApp'
+export { resetLayoutProps, setLayoutProps } from './layoutProps.svelte'
+export { default as inertia } from './link'
+export { default as page, usePage } from './page.svelte'
+export { type LayoutCallback, type ResolvedComponent, type SvelteInertiaAppConfig } from './types'
+export {
+  default as useForm,
+  type InertiaForm,
+  type InertiaFormProps,
+  type InertiaPrecognitiveForm,
+} from './useForm.svelte'
+export { default as useHttp } from './useHttp.svelte'
+export { default as usePoll } from './usePoll.svelte'
+export { default as usePrefetch } from './usePrefetch.svelte'
+export { type InertiaProp, default as useProp } from './useProp.svelte'
+export { default as useRemember } from './useRemember.svelte'
+
+export const config = coreConfig.extend<SvelteInertiaAppConfig>({})

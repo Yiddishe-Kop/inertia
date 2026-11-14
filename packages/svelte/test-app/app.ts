@@ -1,0 +1,118 @@
+import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
+import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
+import { createInertiaApp, type ResolvedComponent, router } from '@inertiajs/svelte'
+import { echo } from '@inertiajs/svelte/echo'
+import { hydrate, mount } from 'svelte'
+import { resolveFakeEcho } from './fakeEcho'
+import { fakeLiveTransport } from './fakeLiveTransport'
+import AppLayout from './Layouts/AppLayout.svelte'
+import DefaultLayout from './Layouts/DefaultLayout.svelte'
+
+window.testing = { Inertia: router }
+window.resolverReceivedPage = null as Page | null
+
+const params = new URLSearchParams(window.location.search)
+
+function getHttpConfig(): HttpClient | HttpClientOptions | undefined {
+  const customXsrf = params.get('customXsrf')
+
+  if (customXsrf) {
+    return { xsrfCookieName: customXsrf, xsrfHeaderName: `X-${customXsrf}` }
+  }
+
+  if (import.meta.env.VITE_HTTP_CLIENT === 'axios') {
+    return axiosAdapter()
+  }
+
+  return undefined
+}
+
+createInertiaApp({
+  // Only the live props page has a manifest, and the fake transport registers a
+  // socket id resolver that other tests don't expect
+  ...(window.location.pathname === '/live' && {
+    live: {
+      transport: fakeLiveTransport(),
+      // Opt-in so the tests that rely on the defaults keep their timings
+      ...(params.has('liveThrottle') && { throttle: Number(params.get('liveThrottle')) }),
+      ...(params.get('liveKeepAlive') === '1' && { pauseWhenHidden: false }),
+    },
+  }),
+  ...(window.location.pathname === '/echo-transport' && {
+    live: echo({ resolve: resolveFakeEcho }),
+  }),
+  page: window.initialPage,
+  resolve: async (name, page) => {
+    const pages = import.meta.glob<ResolvedComponent>(['./Pages/**/*.svelte', '!./Pages/SSR/Async.svelte'], {
+      eager: true,
+    })
+    // Lazy, since importing an async-compiled component enables Svelte's async mode for every page,
+    // and tests without SVELTE_ASYNC rely on sync rendering
+    const asyncPages = import.meta.glob<ResolvedComponent>('./Pages/SSR/Async.svelte')
+
+    if (page) {
+      window.resolverReceivedPage = page
+    }
+
+    if (name === 'DeferredProps/InstantReload') {
+      // Add small delay to ensure the component is loaded after the initial page load
+      // This is for projects that don't use { eager: true } in import.meta.glob
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    }
+
+    if (name === 'Visits/InterruptedVisitHeld') {
+      // Held like a slow lazy chunk, so a newer visit can start while this component is still resolving
+      await new Promise((resolve) => (window.releaseHeldComponent = () => resolve(null)))
+    }
+
+    const path = `./Pages/${name}.svelte`
+
+    return (pages[path] ?? (await asyncPages[path]?.())) as ResolvedComponent
+  },
+  setup({ el, App, props }) {
+    const isServerRendered = el?.hasAttribute('data-server-rendered')
+
+    if (isServerRendered) {
+      hydrate(App, { target: el!, props })
+    } else {
+      mount(App, { target: el!, props })
+    }
+  },
+  http: getHttpConfig(),
+  ...(params.has('withAppDefaults') && {
+    defaults: {
+      visitOptions: (href: string, options: VisitOptions) => {
+        return { headers: { ...options.headers, 'X-From-App-Defaults': 'test' } }
+      },
+    },
+  }),
+  ...(params.has('withDefaultLayout') && {
+    layout: () => DefaultLayout,
+  }),
+  ...(params.has('withDefaultAppLayout') && {
+    layout: () => AppLayout,
+  }),
+  ...(params.has('withServerHead') && {
+    serverHead: true,
+  }),
+  ...(params.has('withServerHeadCallback') && {
+    serverHead: (page) => page.props.head as string[],
+  }),
+  ...(params.has('withServerHeadProp') && {
+    serverHead: 'metaTags',
+  }),
+  ...(params.has('withDefaultLayoutCallback') && {
+    layout: (name: string) => {
+      if (name.startsWith('DefaultLayout/CallbackExcluded')) {
+        return null
+      }
+      return DefaultLayout
+    },
+  }),
+  ...(params.get('popover') === 'false' && {
+    progress: { popover: false },
+  }),
+  ...(params.has('nonce') && {
+    nonce: params.get('nonce') === 'default' ? 'test-default-nonce' : 'test-nonce',
+  }),
+})

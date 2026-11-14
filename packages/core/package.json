@@ -1,0 +1,111 @@
+{
+  "name": "@inertiajs/core",
+  "version": "3.11.0",
+  "license": "MIT",
+  "description": "A framework for creating server-driven single page apps.",
+  "contributors": [
+    "Jonathan Reinink <jonathan@reinink.ca>",
+    "Claudio Dekker <claudio@ubient.net>",
+    "Sebastian De Deyne <sebastiandedeyne@gmail.com>"
+  ],
+  "homepage": "https://inertiajs.com/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inertiajs/inertia.git",
+    "directory": "packages/inertia"
+  },
+  "bugs": {
+    "url": "https://github.com/inertiajs/inertia/issues"
+  },
+  "files": [
+    "dist",
+    "types"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./types/server.d.ts",
+      "import": "./dist/server.js"
+    },
+    "./ssrErrors": {
+      "types": "./types/ssrErrors.d.ts",
+      "import": "./dist/ssrErrors.js"
+    },
+    "./echo": {
+      "types": "./types/echo.d.ts",
+      "import": "./dist/echo.js"
+    },
+    "./pusher": {
+      "types": "./types/pusher.d.ts",
+      "import": "./dist/pusher.js"
+    },
+    "./actionCable": {
+      "types": "./types/actionCable.d.ts",
+      "import": "./dist/actionCable.js"
+    },
+    "./json": {
+      "types": "./types/json.d.ts",
+      "import": "./dist/json.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "server": [
+        "types/server.d.ts"
+      ],
+      "ssrErrors": [
+        "types/ssrErrors.d.ts"
+      ],
+      "echo": [
+        "types/echo.d.ts"
+      ],
+      "pusher": [
+        "types/pusher.d.ts"
+      ],
+      "actionCable": [
+        "types/actionCable.d.ts"
+      ],
+      "json": [
+        "types/json.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && ./build.js && tsc",
+    "build:with-deps": "./build.js --with-deps",
+    "clean": "rm -rf types && rm -rf dist",
+    "dev": "pnpx concurrently -c \"#ffcf00,#3178c6\" \"pnpm dev:build\" \"pnpm dev:types\" --names build,types",
+    "dev:build": "./build.js --watch",
+    "dev:types": "tsc --watch --preserveWatchOutput",
+    "es2022-check": "pnpm build:with-deps && es-check es2022 \"dist/index.js\" --checkFeatures --module --noCache --verbose",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@jridgewell/trace-mapping": "^0.3.31",
+    "es-toolkit": "^1.33.0",
+    "laravel-precognition": "^2.1.1"
+  },
+  "peerDependencies": {
+    "axios": "^1.15.2"
+  },
+  "peerDependenciesMeta": {
+    "axios": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.13",
+    "axios": "^1.20.0",
+    "es-check": "^9.6.4",
+    "esbuild": "^0.28.1",
+    "esbuild-node-externals": "^1.23.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.12"
+  }
+}

@@ -1,3 +1,8 @@
+.DS_Store
+.idea
+/packages/*/test-app/test-results/.last-run.json
+/playgrounds/*/test-results/
+/packages/svelte/test-app/vite.config.js.timestamp-*.mjs
+/playwright-report
+/test-results
 node_modules
-package-lock.json
-yarn.lock

@@ -1,0 +1,25 @@
+<script lang="ts">
+  import { inertia, InfiniteScroll } from '@inertiajs/svelte'
+  import UserCard, { type User } from './UserCard.svelte'
+
+  interface Props {
+    users: { data: User[] }
+  }
+
+  let { users }: Props = $props()
+</script>
+
+<div>
+  <a href="/article" id="leave" use:inertia>Leave to /article</a>
+  <a href="/infinite-scroll/navigate-away/slow-article" id="leave-slowly" use:inertia>Leave slowly to /article</a>
+  <a href="/infinite-scroll/navigate-away?order=desc" id="sort-slowly" use:inertia>Slowly sort descending</a>
+  <InfiniteScroll data="users" style="display: grid; gap: 20px">
+    {#snippet loading()}
+      <div style="text-align: center; padding: 20px">Loading...</div>
+    {/snippet}
+
+    {#each users.data as user (user.id)}
+      <UserCard {user} />
+    {/each}
+  </InfiniteScroll>
+</div>

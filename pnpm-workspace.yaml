@@ -1,0 +1,22 @@
+packages:
+  - packages/*
+  - packages/*/test-app
+  - playgrounds/*
+  - tests/app
+
+allowBuilds:
+  esbuild: true
+
+onlyBuiltDependencies:
+  - '@tailwindcss/oxide'
+  - esbuild
+
+overrides:
+  '@tailwindcss/typography>postcss-selector-parser': '^7.1.6'
+  # GHSA-g3hv-75wg-m249: no patched 10.x, nodemon and eslint ranges still exclude 11.x
+  minimatch@<11.0.1: '^11.0.1'
+
+auditConfig:
+  ignoreGhsas:
+    # deepmerge: no patched release exists yet, only reachable through dev tooling (@sveltejs/vite-plugin-svelte)
+    - GHSA-gcqx-w48m-w2h4
